@@ -225,6 +225,7 @@ namespace gz
       /// \brief Get the EntityComponentManager
       /// \return Reference to the entity component manager.
       public: const EntityComponentManager &EntityCompMgr() const;
+      public: EntityComponentManager &MutEntityCompMgr() ;
 
       /// \brief Return an entity with the provided name.
       /// \details If multiple entities with the same name exist, the first
@@ -292,7 +293,7 @@ namespace gz
       /// and multistep.
       /// \param[out] _res Response to client, true if successful.
       /// \return True for success
-      private: bool OnWorldControl(const msgs::WorldControl &_req,
+      public: bool OnWorldControl(const msgs::WorldControl &_req,
                                          msgs::Boolean &_res);
 
       /// \brief World control state service callback. This function stores the

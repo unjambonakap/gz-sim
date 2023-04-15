@@ -153,6 +153,22 @@ using namespace gz::sim::systems;
 using namespace gz::sim::systems::physics_system;
 namespace components = gz::sim::components;
 
+template<class T>
+void RemoveComponents(EntityComponentManager &ecm){
+  std::vector<Entity> entries;
+  ecm.Each<T>(
+      [&](const Entity &_entity, T *) -> bool
+      {
+        entries.push_back(_entity);
+        return true;
+      });
+
+  for (const auto entity : entries)
+  {
+    ecm.RemoveComponent<T>(entity);
+  }
+
+}
 
 // Private data class.
 class gz::sim::systems::PhysicsPrivate
@@ -541,6 +557,13 @@ class gz::sim::systems::PhysicsPrivate
             MinimumFeatureList,
             physics::GetModelBoundingBox>{};
 
+  //////////////////////////////////////////////////
+  // Bounding box
+  /// \brief Feature list for model bounding box.
+  public: struct InertialFeatureList : physics::FeatureList<
+            MinimumFeatureList,
+            physics::SetLinkInertial>{};
+
 
   //////////////////////////////////////////////////
   // Joint velocity command
@@ -623,6 +646,13 @@ class gz::sim::systems::PhysicsPrivate
             physics::sdf::ConstructSdfNestedModel>{};
 
   //////////////////////////////////////////////////
+  // Bounding box
+  /// \brief Feature list for model bounding box.
+  public: struct GravityFeatureList : physics::FeatureList<
+            MinimumFeatureList,
+            physics::Gravity>{};
+
+  //////////////////////////////////////////////////
   /// \brief World EntityFeatureMap
   public: using WorldEntityMap = EntityFeatureMap3d<
           physics::World,
@@ -632,6 +662,7 @@ class gz::sim::systems::PhysicsPrivate
           SetContactPropertiesCallbackFeatureList,
           NestedModelFeatureList,
           CollisionDetectorFeatureList,
+          GravityFeatureList,
           SolverFeatureList>;
 
   /// \brief A map between world entity ids in the ECM to World Entities in
@@ -660,6 +691,7 @@ class gz::sim::systems::PhysicsPrivate
             CollisionFeatureList,
             HeightmapFeatureList,
             LinkForceFeatureList,
+            InertialFeatureList,
             MeshFeatureList>;
 
   /// \brief A map between link entity ids in the ECM to Link Entities in
@@ -2594,6 +2626,69 @@ void PhysicsPrivate::UpdatePhysics(EntityComponentManager &_ecm)
       });
 
 
+  _ecm.Each<components::GravityCmd>(
+      [&](const Entity &_entity,
+          const components::GravityCmd *_gravityCmd)
+      {
+        if (!this->entityWorldMap.HasEntity(_entity))
+        {
+          gzwarn << "Failed to find world [" << _entity << "]." << std::endl;
+          return true;
+        }
+
+        auto worldEntity = this->entityWorldMap.EntityCast<GravityFeatureList>(_entity);
+
+        if (!worldEntity)
+        {
+          static bool informed{false};
+          if (!informed)
+          {
+            gzdbg << "Attempting to set the gravity, but the physics "
+                   << "engine doesn't support feature "
+                   << "[physics::World]."
+                   << std::endl;
+            informed = true;
+          }
+
+          return false;
+        }
+
+        worldEntity->SetGravity(math::eigen3::convert(_gravityCmd->Data()));
+        return true;
+      });
+
+  _ecm.Each<components::InertialCmd>(
+      [&](const Entity &_entity,
+          const components::InertialCmd *_inertialCmd)
+      {
+        if (!this->entityLinkMap.HasEntity(_entity))
+        {
+          gzwarn << "Failed to find link [" << _entity << "]." << std::endl;
+          return true;
+        }
+
+        auto inertialLink =
+            this->entityLinkMap.EntityCast<InertialFeatureList>(_entity);
+
+        if (!inertialLink)
+        {
+          static bool informed{false};
+          if (!informed)
+          {
+            gzdbg << "Attempting to set the inertial, but the physics "
+                   << "engine doesn't support feature "
+                   << "[SetInertial]."
+                   << std::endl;
+            informed = true;
+          }
+
+          return false;
+        }
+
+        inertialLink->SetLinkInertialFunc(_inertialCmd->Data());
+        return true;
+      });
+
   // Populate bounding box info
   // Only compute bounding box if component exists to avoid unnecessary
   // computations
@@ -3473,19 +3568,9 @@ void PhysicsPrivate::UpdateSim(EntityComponentManager &_ecm,
       });
   GZ_PROFILE_END();
 
-  _ecm.Each<components::AngularVelocityCmd>(
-      [&](const Entity &, components::AngularVelocityCmd *_vel) -> bool
-      {
-        _vel->Data() = math::Vector3d::Zero;
-        return true;
-      });
-
-  _ecm.Each<components::LinearVelocityCmd>(
-      [&](const Entity &, components::LinearVelocityCmd *_vel) -> bool
-      {
-        _vel->Data() = math::Vector3d::Zero;
-        return true;
-      });
+  RemoveComponents<components::LinearVelocityCmd>(_ecm);
+  RemoveComponents<components::AngularVelocityCmd>(_ecm);
+  RemoveComponents<components::InertialCmd>(_ecm);
 
   // Update joint positions
   GZ_PROFILE_BEGIN("Joints");

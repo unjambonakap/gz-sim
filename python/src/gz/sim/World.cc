@@ -36,6 +36,7 @@ void defineSimWorld(pybind11::object module)
     "model_by_name", &gz::sim::World::ModelByName,
     "Get the ID of a model entity which is an immediate child of "
     " this world.")
+  .def( "entity", &gz::sim::World::Entity, "Get the entity id")
   .def(
     "gravity", &gz::sim::World::Gravity,
     "Get the gravity in m/s^2.");

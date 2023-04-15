@@ -54,6 +54,10 @@ cmake_dependent_option(USE_DIST_PACKAGES_FOR_PYTHON
       "Use dist-packages instead of site-package to install python modules"
       OFF "NOT SKIP_PYBIND11" OFF)
 
+if (BUILD_TESTING)
+  message(FATAL_ERROR "123")
+
+endif()
 #============================================================================
 # Search for project-specific dependencies
 #============================================================================
@@ -251,22 +255,22 @@ configure_file(${CMAKE_SOURCE_DIR}/tools/desktop/gz-logo.svg.in ${CMAKE_BINARY_D
 # disable doxygen on macOS due to issues with doxygen 1.9.0
 # there is an unreleased fix; revert this when 1.9.1 is released
 # https://github.com/gazebosim/gz-sim/issues/520
-if (NOT APPLE)
-  gz_create_docs(
-    API_MAINPAGE_MD "${CMAKE_BINARY_DIR}/api.md"
-    TUTORIALS_MAINPAGE_MD "${CMAKE_BINARY_DIR}/tutorials.md"
-    ADDITIONAL_INPUT_DIRS "${CMAKE_SOURCE_DIR}/src/systems ${CMAKE_SOURCE_DIR}/src/gui/plugins"
-    IMAGE_PATH_DIRS "${CMAKE_SOURCE_DIR}/tutorials/files"
-    TAGFILES
-     "${GZ-MATH_DOXYGEN_TAGFILE} = ${GZ-MATH_API_URL}"
-     "${GZ-MSGS_DOXYGEN_TAGFILE} = ${GZ-MSGS_API_URL}"
-     "${GZ-PHYSICS_DOXYGEN_TAGFILE} = ${GZ-PHYSICS_API_URL}"
-     "${GZ-PLUGIN_DOXYGEN_TAGFILE} = ${GZ-PLUGIN_API_URL}"
-     "${GZ-TRANSPORT_DOXYGEN_TAGFILE} = ${GZ-TRANSPORT_API_URL}"
-     "${GZ-SENSORS_DOXYGEN_TAGFILE} = ${GZ-SENSORS_API_URL}"
-     "${GZ-COMMON_DOXYGEN_TAGFILE} = ${GZ-COMMON_API_URL}"
-  )
-endif()
+#if (NOT APPLE)
+#  gz_create_docs(
+#    API_MAINPAGE_MD "${CMAKE_BINARY_DIR}/api.md"
+#    TUTORIALS_MAINPAGE_MD "${CMAKE_BINARY_DIR}/tutorials.md"
+#    ADDITIONAL_INPUT_DIRS "${CMAKE_SOURCE_DIR}/src/systems ${CMAKE_SOURCE_DIR}/src/gui/plugins"
+#    IMAGE_PATH_DIRS "${CMAKE_SOURCE_DIR}/tutorials/files"
+#    TAGFILES
+#     "${GZ-MATH_DOXYGEN_TAGFILE} = ${GZ-MATH_API_URL}"
+#     "${GZ-MSGS_DOXYGEN_TAGFILE} = ${GZ-MSGS_API_URL}"
+#     "${GZ-PHYSICS_DOXYGEN_TAGFILE} = ${GZ-PHYSICS_API_URL}"
+#     "${GZ-PLUGIN_DOXYGEN_TAGFILE} = ${GZ-PLUGIN_API_URL}"
+#     "${GZ-TRANSPORT_DOXYGEN_TAGFILE} = ${GZ-TRANSPORT_API_URL}"
+#     "${GZ-SENSORS_DOXYGEN_TAGFILE} = ${GZ-SENSORS_API_URL}"
+#     "${GZ-COMMON_DOXYGEN_TAGFILE} = ${GZ-COMMON_API_URL}"
+#  )
+#endif()
 
 if(TARGET doc)
   file(COPY ${CMAKE_SOURCE_DIR}/tutorials/files/ DESTINATION ${CMAKE_BINARY_DIR}/doxygen/html/files/)

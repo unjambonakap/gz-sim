@@ -43,6 +43,10 @@ namespace components
   using Inertial = Component<math::Inertiald, class InertialTag,
                              serializers::InertialSerializer>;
   GZ_SIM_REGISTER_COMPONENT("gz_sim_components.Inertial", Inertial)
+
+  using InertialCmd = Component<math::Inertiald, class InertialCmdTag,
+                             serializers::InertialSerializer>;
+  GZ_SIM_REGISTER_COMPONENT("gz_sim_components.InertialCmd", InertialCmd)
 }
 }
 }

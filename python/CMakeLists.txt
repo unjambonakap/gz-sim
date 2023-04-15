@@ -38,6 +38,7 @@ function(configure_build_install_location _library_name)
     DESTINATION "${GZ_PYTHON_INSTALL_PATH}"
   )
 endfunction()
+include_directories(/home/benoit/repos/pybind11_protobuf)
 
 set(BINDINGS_MODULE_NAME "sim${PROJECT_VERSION_MAJOR}")
 pybind11_add_module(${BINDINGS_MODULE_NAME} MODULE
@@ -52,9 +53,17 @@ pybind11_add_module(${BINDINGS_MODULE_NAME} MODULE
   src/gz/sim/World.cc
 )
 
+add_library(ABC SHARED IMPORTED)
+set_target_properties(ABC PROPERTIES
+            IMPORTED_LOCATION /usr/local/lib/pybind11_proto_utils.cpython-310-x86_64-linux-gnu.so
+
+            )
 target_link_libraries(${BINDINGS_MODULE_NAME} PRIVATE
   ${PROJECT_LIBRARY_TARGET_NAME}
   gz-common${GZ_COMMON_VER}::gz-common${GZ_COMMON_VER}
+  libpybind11_native_proto_caster.so
+  ABC
+  #libpybind11_wrapped_proto_caster.so
 )
 
 target_compile_definitions(${BINDINGS_MODULE_NAME} PRIVATE

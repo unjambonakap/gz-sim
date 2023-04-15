@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 #include "EntityComponentManager.hh"
 
@@ -28,7 +29,10 @@ void defineSimEntityComponentManager(pybind11::object module)
 {
   pybind11::class_<gz::sim::EntityComponentManager>(
       module, "EntityComponentManager")
-  .def(pybind11::init<>());
+  .def(pybind11::init<>())
+  .def("component_types", &gz::sim::EntityComponentManager::ComponentTypes, "Get canonical link")
+  ;
+
 }
 }  // namespace python
 }  // namespace sim

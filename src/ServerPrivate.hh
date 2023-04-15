@@ -161,6 +161,10 @@ namespace gz
       /// server is in the run state.
       public: std::atomic<bool> running{false};
 
+      /// \brief This is used to indicate that Run has been called, and the
+      /// server is in the run state.
+      public: std::atomic<bool> hasRun{false};
+
       /// \brief Thread that executes systems.
       public: std::thread runThread;
 

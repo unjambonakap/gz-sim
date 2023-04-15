@@ -213,6 +213,7 @@ namespace gz
       public: std::optional<size_t> SystemCount(
                   const unsigned int _worldIndex = 0) const;
 
+      public: EntityComponentManager *EntityCompMgr(const unsigned int _worldIndex = 0) ;
       /// \brief Add a System to the server. The server must not be running when
       /// calling this.
       /// \param[in] _system system to be added

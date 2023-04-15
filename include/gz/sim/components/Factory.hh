@@ -142,7 +142,7 @@ namespace components
 
       if (debugEnv == "true")
       {
-        std::cout << "Registering [" << ComponentTypeT::typeName << "]"
+        std::cout << "Registering [" << ComponentTypeT::typeName << "]" << " = " << ComponentTypeT::typeId
                   << std::endl;
       }
 

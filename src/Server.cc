@@ -215,14 +215,19 @@ bool Server::Run(const bool _blocking, const uint64_t _iterations,
   if (this->dataPtr->runThread.get_id() == std::thread::id())
   {
     std::condition_variable cond;
+    bool launched = false;
     this->dataPtr->runThread =
-      std::thread(&ServerPrivate::Run, this->dataPtr.get(), _iterations, &cond);
+      std::thread([&](){
+          this->dataPtr->running = true;
+          launched = true;
+          this->dataPtr->Run(_iterations, &cond);
+          });
 
     // Wait for the thread to start. We do this to guarantee that the
     // running variable gets updated before this function returns. With
     // a small number of iterations it is possible that the run thread
     // successfuly completes before this function returns.
-    cond.wait(lock, [this]() -> bool {return this->dataPtr->running;});
+    cond.wait(lock, [&]() -> bool {return launched;});
     return true;
   }
 
@@ -350,6 +355,14 @@ std::optional<bool> Server::AddSystem(const std::shared_ptr<System> &_system,
   }
 
   return std::nullopt;
+}
+
+EntityComponentManager * Server::EntityCompMgr(const unsigned int _worldIndex) {
+  if (_worldIndex < this->dataPtr->simRunners.size())
+    return &this->dataPtr->simRunners[_worldIndex]->MutEntityCompMgr();
+
+  return nullptr;
+
 }
 
 //////////////////////////////////////////////////

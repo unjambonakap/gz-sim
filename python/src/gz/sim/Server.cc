@@ -41,8 +41,16 @@ void defineSimServer(pybind11::object module)
     " in true to the _blocking argument to run the server in the current "
     " thread.")
   .def(
+    "stop", &gz::sim::Server::Stop,
+    "Stop the server")
+  .def(
     "has_entity", &gz::sim::Server::HasEntity,
     "Return true if the specified world has an entity with the provided name.")
+  .def(
+    "entity_comp_mgr", &gz::sim::Server::EntityCompMgr,
+    "Return true if the specified world has an entity with the provided name.",
+    pybind11::return_value_policy::reference
+    )
   .def(
     "is_running",
     pybind11::overload_cast<>(&gz::sim::Server::Running, pybind11::const_),

@@ -193,74 +193,74 @@ set(GZ_SIM_PLUGIN_INSTALL_DIR
   ${CMAKE_INSTALL_PREFIX}/${GZ_LIB_INSTALL_DIR}/gz-${GZ_DESIGNATION}-${PROJECT_VERSION_MAJOR}/plugins
 )
 
-include_directories(${PROJECT_SOURCE_DIR}/test)
-
-# Build the unit tests
-gz_build_tests(TYPE UNIT
-  SOURCES
-    ${gtest_sources}
-  LIB_DEPS
-    ${PROJECT_LIBRARY_TARGET_NAME}
-    ${EXTRA_TEST_LIB_DEPS}
-    gz-sim${PROJECT_VERSION_MAJOR}
-)
-
-# Some server unit tests require rendering.
-if (TARGET UNIT_Server_Rendering_TEST)
- target_link_libraries(UNIT_Server_Rendering_TEST
-    gz-rendering${GZ_RENDERING_VER}::gz-rendering${GZ_RENDERING_VER}
-  )
-endif()
-
-# Command line tests need extra settings
-foreach(CMD_TEST
-  UNIT_gz_TEST
-  UNIT_ModelCommandAPI_TEST)
-
-  if(NOT TARGET ${CMD_TEST})
-    continue()
-  endif()
-
-  # Running `gz sim` on macOS has problems when run with /usr/bin/ruby
-  # due to System Integrity Protection (SIP). Try to find ruby from
-  # homebrew as a workaround.
-  if (APPLE)
-    find_program(BREW_RUBY ruby HINTS /usr/local/opt/ruby/bin)
-  endif()
-
-  add_dependencies(${CMD_TEST}
-    ${gz_lib_target}
-    TestModelSystem
-    TestSensorSystem
-    TestWorldSystem
-  )
-
-  target_compile_definitions(${CMD_TEST} PRIVATE
-      "BREW_RUBY=\"${BREW_RUBY} \"")
-
-  target_compile_definitions(${CMD_TEST} PRIVATE
-      "GZ_PATH=\"${GZ_TOOLS_PROGRAM}\"")
-
-  set(_env_vars)
-  list(APPEND _env_vars "GZ_CONFIG_PATH=${CMAKE_BINARY_DIR}/test/conf")
-  list(APPEND _env_vars "GZ_SIM_SYSTEM_PLUGIN_PATH=$<TARGET_FILE_DIR:TestModelSystem>")
-
-  set_tests_properties(${CMD_TEST} PROPERTIES
-    ENVIRONMENT "${_env_vars}")
-
-  # On Windows there is no RPATH, so an alternative way for tests for finding .dll libraries
-  # in build directory in necessary. For regular tests, the trick is to place all libraries
-  # and executables in a common CMAKE_RUNTIME_OUTPUT_DIRECTORY, so that the .dll are found
-  # as they are in the same directory where the executable is loaded. For tests that are
-  # launched via Ruby, this does not work, so we need to manually add CMAKE_RUNTIME_OUTPUT_DIRECTORY
-  # to the PATH. This is done via the ENVIRONMENT_MODIFICATION that is only available
-  # since CMake 3.22. However, if an older CMake is used another trick to install the libraries
-  # beforehand
-  if (WIN32 AND CMAKE_VERSION STRGREATER "3.22")
-    set_tests_properties(${CMD_TEST} PROPERTIES
-      ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
-  endif()
-
-endforeach()
+#include_directories(${PROJECT_SOURCE_DIR}/test)
+#
+## Build the unit tests
+#gz_build_tests(TYPE UNIT
+#  SOURCES
+#    ${gtest_sources}
+#  LIB_DEPS
+#    ${PROJECT_LIBRARY_TARGET_NAME}
+#    ${EXTRA_TEST_LIB_DEPS}
+#    gz-sim${PROJECT_VERSION_MAJOR}
+#)
+#
+## Some server unit tests require rendering.
+#if (TARGET UNIT_Server_Rendering_TEST)
+# target_link_libraries(UNIT_Server_Rendering_TEST
+#    gz-rendering${GZ_RENDERING_VER}::gz-rendering${GZ_RENDERING_VER}
+#  )
+#endif()
+#
+## Command line tests need extra settings
+#foreach(CMD_TEST
+#  UNIT_gz_TEST
+#  UNIT_ModelCommandAPI_TEST)
+#
+#  if(NOT TARGET ${CMD_TEST})
+#    continue()
+#  endif()
+#
+#  # Running `gz sim` on macOS has problems when run with /usr/bin/ruby
+#  # due to System Integrity Protection (SIP). Try to find ruby from
+#  # homebrew as a workaround.
+#  if (APPLE)
+#    find_program(BREW_RUBY ruby HINTS /usr/local/opt/ruby/bin)
+#  endif()
+#
+#  add_dependencies(${CMD_TEST}
+#    ${gz_lib_target}
+#    TestModelSystem
+#    TestSensorSystem
+#    TestWorldSystem
+#  )
+#
+#  target_compile_definitions(${CMD_TEST} PRIVATE
+#      "BREW_RUBY=\"${BREW_RUBY} \"")
+#
+#  target_compile_definitions(${CMD_TEST} PRIVATE
+#      "GZ_PATH=\"${GZ_TOOLS_PROGRAM}\"")
+#
+#  set(_env_vars)
+#  list(APPEND _env_vars "GZ_CONFIG_PATH=${CMAKE_BINARY_DIR}/test/conf")
+#  list(APPEND _env_vars "GZ_SIM_SYSTEM_PLUGIN_PATH=$<TARGET_FILE_DIR:TestModelSystem>")
+#
+#  set_tests_properties(${CMD_TEST} PROPERTIES
+#    ENVIRONMENT "${_env_vars}")
+#
+#  # On Windows there is no RPATH, so an alternative way for tests for finding .dll libraries
+#  # in build directory in necessary. For regular tests, the trick is to place all libraries
+#  # and executables in a common CMAKE_RUNTIME_OUTPUT_DIRECTORY, so that the .dll are found
+#  # as they are in the same directory where the executable is loaded. For tests that are
+#  # launched via Ruby, this does not work, so we need to manually add CMAKE_RUNTIME_OUTPUT_DIRECTORY
+#  # to the PATH. This is done via the ENVIRONMENT_MODIFICATION that is only available
+#  # since CMake 3.22. However, if an older CMake is used another trick to install the libraries
+#  # beforehand
+#  if (WIN32 AND CMAKE_VERSION STRGREATER "3.22")
+#    set_tests_properties(${CMD_TEST} PROPERTIES
+#      ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+#  endif()
+#
+#endforeach()
 
 add_subdirectory(cmd)

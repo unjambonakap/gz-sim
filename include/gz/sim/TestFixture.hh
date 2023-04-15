@@ -95,11 +95,15 @@ class GZ_SIM_VISIBLE TestFixture
   public: TestFixture &OnPostUpdate(std::function<void(
       const UpdateInfo &, const EntityComponentManager &)> _cb);
 
+  public: TestFixture &OnReset(std::function<void(
+      const UpdateInfo &, EntityComponentManager &)> _cb);
+
   /// \brief Finalize all the functions and add fixture to server.
   /// Finalize must be called before running the server, otherwise none of the
   /// `On*` functions will be called.
   /// The `OnConfigure` callback is called immediately on finalize.
   public: TestFixture &Finalize();
+  public: void Release();
 
   /// \brief Get pointer to underlying server.
   public: std::shared_ptr<sim::Server> Server() const;

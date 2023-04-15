@@ -16,6 +16,7 @@
 */
 #include <pybind11/functional.h>
 #include <pybind11/stl.h>
+#include <memory>
 
 #include "TestFixture.hh"
 
@@ -37,10 +38,11 @@ defineSimTestFixture(pybind11::object module)
   testFixture
   .def(pybind11::init<const std::string &>())
   .def(
-    "server", &TestFixture::Server,
+    "server", [](TestFixture *self) {return self->Server().get();},
     pybind11::return_value_policy::reference,
     "Get pointer to underlying server."
   )
+  .def( "release", &TestFixture::Release, "--")
   .def(
     "finalize", &TestFixture::Finalize,
     pybind11::return_value_policy::reference,
@@ -74,6 +76,17 @@ defineSimTestFixture(pybind11::object module)
           const UpdateInfo &, const EntityComponentManager &)> _cb)
       {
         self->OnPostUpdate(_cb);
+      }
+    ),
+    pybind11::return_value_policy::reference,
+    "Wrapper around a system's post-update callback"
+  )
+  .def(
+    "on_reset", WrapCallbacks(
+      [](TestFixture* self, std::function<void(
+          const UpdateInfo &, EntityComponentManager &)> _cb)
+      {
+        self->OnReset(_cb);
       }
     ),
     pybind11::return_value_policy::reference,
